@@ -1,10 +1,11 @@
 import numpy as np
+from util import squared_loss
 
 
 class NeuralNetwork:
 
-    def __init__(self, features, *hidden_layers, classes, alpha, node_operator):
-        if type(features) is not list or type(classes) is not list or hidden_layers and type(hidden_layers) is not list:
+    def __init__(self, features, hidden_layers, classes, alpha, node_operator):
+        if type(features) is not list or type(classes) is not list or (hidden_layers and type(hidden_layers) is not list):
             raise TypeError("One of the inputs is not a list.")
         if type(alpha) is not float:
             raise TypeError("Alpha must be a float between 0.0 and 1.0")
@@ -30,9 +31,8 @@ class NeuralNetwork:
         # TODO: Implement backpropagation/backward pass
         pass
 
-    def __compute_loss(self):
-        # TODO: Implement some smart loss function
-        pass
+    def __compute_loss(self, actual, correct):
+        return squared_loss(actual,correct)
 
     def __process_case(self, feature_vector, class_label):
         if class_label not in self.classes:
