@@ -1,5 +1,5 @@
 import numpy as np
-from util import sigmoid,sigmoid_derivated,squared_loss, squared_loss_derivated
+from util import sigmoid,sigmoid_derivated, squared_loss, squared_loss_derivated
 
 
 class Layer:
@@ -16,12 +16,23 @@ class Layer:
         return self.activation_function(np.dot(input_vector,self.weights))
 
     def update_weights(self, input_vctor, grad_loss, lr, error_prop=np.array([1])):
-        z = np.dot(input_vctor,self.weights)
-        grad_a = np.vectorize(sigmoid_derivated)(z)
-        #uses is_output_layer to decide error function to be used
-        error = grad_loss*grad_a if self.is_output_layer else np.dot(error_prop,grad_loss[np.newaxis].T)*grad_a
         #np.newaxis is hack to transpose 1-D arrays
-        self.weights = self.weights - lr*np.dot(input_vctor[np.newaxis].T,error[np.newaxis])
+        if grad_loss.ndim == 1:
+            grad_loss = grad_loss[np.newaxis]
+        if input_vctor.ndim == 1:
+            input_vctor = input_vctor[np.newaxis]
+
+        z = np.dot(input_vctor, self.weights)
+        grad_a = np.vectorize(sigmoid_derivated)(z)
+
+        #uses is_output_layer to decide error function to be used
+        error = grad_loss*grad_a if self.is_output_layer else np.dot(error_prop, grad_loss.T)*grad_a
+
+        if error.ndim == 1:
+            error = error[np.newaxis]
+
+        self.weights = self.weights - lr*np.dot(input_vctor.T, error)
+
         #returns so we can propagate error
         return error
 
@@ -56,11 +67,34 @@ def main2(train, epochs):
             a.update_weights(np.array(sample[0]),grad_loss,0.1)
     #print performance after training
     for sample in train:
-        print("sample:",sample[0][:-1])
+        print("sample:", sample[0][:-1])
         result = a.forward_step(np.array(sample[0]))
-        print("Result:",result, "is","correct" if result==sample[1] else "wrong")
+        print("Result:", result, "is","correct" if result == sample[1] else "wrong")
         print()
 
+def main3(train, epochs):
+    a = Layer(in_size=len(train[0][0])+1, num_of_nodes=len(train[0][0]), level=0, is_output_layer=False)
+    b = Layer(in_size=len(train[0][0])+1, num_of_nodes=1, level=1, is_output_layer=True)
+    for sample in train:
+        sample[0].append(1)
+    for i in range(epochs):
+        for sample in train:
+            output_a = a.forward_step(np.array(sample[0]))
+            output_a = np.append(output_a, [1])
+            output_b = b.forward_step(output_a)
+            grad_loss_b = squared_loss_derivated(np.array(sample[1]), output_b)
+            grad_loss_a = b.weights[:-1]
+            error_prop_b = b.update_weights(input_vctor=output_a, grad_loss=grad_loss_b, lr=0.5)
+            a.update_weights(input_vctor=np.array(sample[0]), grad_loss=grad_loss_a, lr=0.5, error_prop=error_prop_b)
+    for sample in train:
+        print("sample:", sample[0][:-1])
+        result = b.forward_step(np.append(np.array(a.forward_step(np.array(sample[0]))), 1))
+        print("Result:", result, "is", "correct" if result == sample[1] else "wrong")
+        print()
+
+
 #training samples representing the AND function
-t = [[[0,0],0],[[1,0],0],[[0,1],0],[[1,1],1]]
-main2(t,100)
+#main2(t,100)
+for i in range(10):
+    t = [[[0,0],0],[[1,0],1],[[0,1],1],[[1,1],0]]
+    main3(t, 10000)
