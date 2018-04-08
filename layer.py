@@ -8,21 +8,22 @@ class Layer:
         self.level = level
         self.is_output_layer = is_output_layer
         self.weights = 2*np.random.rand(in_size, num_of_nodes)-1
+        self.num_nodes = num_of_nodes
         self.activation_threshhold = 0.5
         #typecasting in case of datatype issues later
-        self.activation_function = np.vectorize(lambda x: int(activation_function(x)>self.activation_threshhold))
+        self.activation_function = np.vectorize(lambda x: int(activation_function(x) > self.activation_threshhold))
 
     def forward_step(self, input_vector):
         return self.activation_function(np.dot(input_vector,self.weights))
 
-    def update_weights(self, input_vctor, grad_loss, lr, error_prop=np.array([1])):
+    def update_weights(self, input_vector, grad_loss, lr, error_prop=np.array([1])):
         #np.newaxis is hack to transpose 1-D arrays
         if grad_loss.ndim == 1:
             grad_loss = grad_loss[np.newaxis]
-        if input_vctor.ndim == 1:
-            input_vctor = input_vctor[np.newaxis]
+        if input_vector.ndim == 1:
+            input_vector = input_vector[np.newaxis]
 
-        z = np.dot(input_vctor, self.weights)
+        z = np.dot(input_vector, self.weights)
         grad_a = np.vectorize(sigmoid_derivated)(z)
 
         #uses is_output_layer to decide error function to be used
@@ -31,10 +32,16 @@ class Layer:
         if error.ndim == 1:
             error = error[np.newaxis]
 
-        self.weights = self.weights - lr*np.dot(input_vctor.T, error)
+        self.weights = self.weights - lr*np.dot(input_vector.T, error)
 
         #returns so we can propagate error
         return error
+
+    def get_num_nodes(self):
+        return self.num_nodes
+
+    def get_weights(self):
+        return self.weights
 
 
 #used as playground
@@ -63,8 +70,8 @@ def main2(train, epochs):
     for i in range(epochs):
         for sample in train:
             out = a.forward_step(np.array(sample[0]))
-            grad_loss = squared_loss_derivated(np.array(sample[1]),out)
-            a.update_weights(np.array(sample[0]),grad_loss,0.1)
+            grad_loss = squared_loss_derivated(np.array(sample[1]), out)
+            a.update_weights(np.array(sample[0]), grad_loss, 0.1)
     #print performance after training
     for sample in train:
         print("sample:", sample[0][:-1])
@@ -84,17 +91,17 @@ def main3(train, epochs):
             output_b = b.forward_step(output_a)
             grad_loss_b = squared_loss_derivated(np.array(sample[1]), output_b)
             grad_loss_a = b.weights[:-1]
-            error_prop_b = b.update_weights(input_vctor=output_a, grad_loss=grad_loss_b, lr=0.5)
-            a.update_weights(input_vctor=np.array(sample[0]), grad_loss=grad_loss_a, lr=0.5, error_prop=error_prop_b)
+            error_prop_b = b.update_weights(input_vector=output_a, grad_loss=grad_loss_b, lr=0.1)
+            a.update_weights(input_vector=np.array(sample[0]), grad_loss=grad_loss_a, lr=0.1, error_prop=error_prop_b)
     for sample in train:
-        print("sample:", sample[0][:-1])
         result = b.forward_step(np.append(np.array(a.forward_step(np.array(sample[0]))), 1))
-        print("Result:", result, "is", "correct" if result == sample[1] else "wrong")
-        print()
+        if result != sample[1]:
+            return False
+    return True
 
 
 #training samples representing the AND function
 #main2(t,100)
 for i in range(10):
-    t = [[[0,0],0],[[1,0],1],[[0,1],1],[[1,1],0]]
-    main3(t, 10000)
+    t = [[[0, 0], 0], [[1, 0], 1], [[0, 1], 1], [[1, 1], 0]]
+    print("Everything correct?", main3(t, 10000))
