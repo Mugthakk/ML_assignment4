@@ -1,6 +1,6 @@
 import numpy as np
+from util import squared_loss, squared_loss_derivated
 from layer import Layer
-from util import squared_loss
 
 
 class NeuralNetwork:
@@ -23,29 +23,31 @@ class NeuralNetwork:
         self.node_operator = node_operator
         # TODO: Initialize the weights and make the connected graph that is the network in some way
 
-    def train(self, cases):
-        # TODO: Implement the training process
-        for case in cases:
-            self.__process_case(case[0], case[1])
+    def train(self, cases, epochs):
+        last_layer_index = len(self.layers) - 1
+        outputs = [0 for _ in self.layers]
+        error_props = [0 for _ in self.layers]
 
-    def __inference_step(self, features):
-        # TODO: Implement feedforward/inference step, prolly needs some inputs
-        return np.array(np.zeros(len(layer)) for layer in self.hidden_layers)
+        for _ in range(epochs):
+            for case in cases:
 
-    def __backward_pass(self, losses):
-        # TODO: Implement backpropagation/backward pass
-        pass
+                # Forward stepping through the network
+                for i in range(len(self.layers)):
+                    layer = self.layers[i]
+                    output = layer.forward_step(np.array(case[0])) if i == 0 else layer.forward_step(outputs[i-1])
+                    # TODO: Add this bias-append to forward_step
+                    outputs[i] = np.append(output, [1])
 
-    def __compute_loss(self, actual, correct):
-        return squared_loss(actual,correct)
+                # Backpropagation to update weights
+                for i in range(last_layer_index, -1, -1):
+                    grad_loss = squared_loss_derivated(np.array(case[1]), outputs[i]) if i == last_layer_index else self.layers[i+1].get_weights()
+                    input_vector = outputs[i-1] if i > 0 else np.array(case[0])
+                    prev_error = error_props[i+1] if i < last_layer_index else np.array(layer.get_num_nodes())
+                    error_prop = layer.update_weights(input_vector, grad_loss, self.alpha, prev_error)
+                    error_props[i] = error_prop
 
-    def __process_case(self, feature_vector, class_label):
-        if class_label not in self.classes:
-            raise TypeError("Label is not part of this network's classes.")
-        if len(feature_vector) is not len(self.features):
-            raise TypeError("Length if feature vector is not the same as the network's defined feature length.")
-        # TODO: Run features through the current network, return losses for each layer?
-        return np.array(np.zeros(len(layer)) for layer in self.hidden_layers)
+
+
 
     def evaluate(self,samples):
         ""
