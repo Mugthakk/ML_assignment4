@@ -10,7 +10,8 @@ class Layer:
         self.weights = 2*np.random.rand(in_size, num_of_nodes)-1
         self.activation_threshhold = 0.5
         #typecasting in case of datatype issues later
-        self.activation_function = np.vectorize(lambda x: int(activation_function(x)>self.activation_threshhold))
+        #self.activation_function = np.vectorize(lambda x: int(activation_function(x)>self.activation_threshhold))
+        self.activation_function = np.vectorize(activation_function)
 
     def forward_step(self, input_vector):
         return self.activation_function(np.dot(input_vector,self.weights))
@@ -88,13 +89,16 @@ def main3(train, epochs):
             a.update_weights(input_vctor=np.array(sample[0]), grad_loss=grad_loss_a, lr=0.5, error_prop=error_prop_b)
     for sample in train:
         print("sample:", sample[0][:-1])
-        result = b.forward_step(np.append(np.array(a.forward_step(np.array(sample[0]))), 1))
+        result = 1 if b.forward_step(np.append(np.array(a.forward_step(np.array(sample[0]))), 1)) > 0.5 else 0
         print("Result:", result, "is", "correct" if result == sample[1] else "wrong")
         print()
 
 
 #training samples representing the AND function
-#main2(t,100)
-for i in range(10):
+t = [[[0,0],0],[[1,0],0],[[0,1],0],[[1,1],1]]
+main2(t,1000)
+'''
+for i in range(1):
     t = [[[0,0],0],[[1,0],1],[[0,1],1],[[1,1],0]]
-    main3(t, 10000)
+    main3(t, 1000)
+'''
