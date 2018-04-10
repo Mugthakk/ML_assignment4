@@ -1,6 +1,7 @@
 import numpy as np
-from util import error_plot, squared_loss_derivated,squared_loss
+from util import error_plot, squared_loss_derivated, squared_loss
 from layer import Layer
+from recognize_digits import decode_one_hot
 
 
 class NeuralNetwork:
@@ -25,7 +26,7 @@ class NeuralNetwork:
             epoch_score = 0
             for case in cases:
 
-                self.forward_pass(case,outputs)
+                self.forward_pass(case, outputs)
 
                 # Backpropagation to update weights
                 for i in range(last_layer_index, -1, -1):
@@ -36,7 +37,7 @@ class NeuralNetwork:
                     error_prop = self.layers[i].update_weights(input_vector, grad_loss, self.lr, prev_error)
                     error_props[i] = error_prop
                 if show_error_plot:
-                    epoch_score += squared_loss(case[1],outputs[-1])
+                    epoch_score += np.sum(squared_loss(case[1], outputs[-1]))
             plot_data.append(epoch_score)
         if show_error_plot:
             #print(plot_data[:3])
@@ -47,24 +48,23 @@ class NeuralNetwork:
             layer = self.layers[i]
             input_vector = np.array(case[0]) if i == 0 else outputs[i-1]
             #add bias
-            input_vector = np.append(input_vector,[1])
+            input_vector = np.append(input_vector, [1])
             output = layer.forward_step(input_vector)
             outputs[i] = output
 
-    def evaluate(self,samples):
+    def evaluate(self, samples):
+        correct_samples = 0
         for i in range(len(samples)):
             outputs = [0]*len(self.layers)
-            self.forward_pass(np.array(samples[i]),outputs)
-            print("sample:", samples[i][0])
-            result = 1 if outputs[-1] > 0.5 else 0
-            print("Result:", outputs[-1], "is", "correct" if result == samples[i][1] else "wrong")
-            print()
+            self.forward_pass(np.array(samples[i]), outputs)
+            if np.argmax(outputs[-1]) == decode_one_hot(samples[i][1]):
+                correct_samples += 1
+        return correct_samples/len(samples)
 
-        #TODO: make function to test the network and calculate accuracy
 
-sanderErNoob = NeuralNetwork(2,[2,1],[0,1], 0.25)
-t = [[[0,0],0],[[1,0],1],[[0,1],1],[[1,1],0]]
-sanderErNoob.train(t,5000,True)
-sanderErNoob.evaluate(t)
-
+if __name__ == "__main__":
+    sanderErNoob = NeuralNetwork(2,[2,1],[0,1], 0.25)
+    t = [[[0,0],0],[[1,0],1],[[0,1],1],[[1,1],0]]
+    sanderErNoob.train(t,5000,True)
+    sanderErNoob.evaluate(t)
 

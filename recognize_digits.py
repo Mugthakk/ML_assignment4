@@ -1,25 +1,35 @@
 from sklearn.datasets import load_digits
+from scipy import stats
 import matplotlib.pyplot as plt
-from numpy import reshape, array, int8, zeros
+from numpy import reshape, array, int8, zeros, float16, argmax
 import random
 
 
-def make_case_tuples(digits):
+def get_digit_tuples(normalize=False):
+    digits = load_digits()
     cases_tuples = []
+
     for i in range(len(digits.images)):
-        picture_to_vector = array(reshape(digits.images[i], len(digits.images[0])*len(digits.images[0][0])), dtype=int8)
-        cases_tuples.append((picture_to_vector, digits.target[i]))
+        if normalize:
+            picture_to_vector = array(reshape(digits.images[i], len(digits.images[0]) * len(digits.images[0][0])),
+                                      dtype=float16)
+            picture_to_vector = stats.zscore(picture_to_vector)
+        else:
+            picture_to_vector = array(reshape(digits.images[i], len(digits.images[0])*len(digits.images[0][0])), dtype=int8)
+        cases_tuples.append((picture_to_vector, one_hot_map[digits.target[i]]))
     return cases_tuples
 
 
 def one_hot_encoding_of_sequence(classes):
     one_hot_map = {}
+    #backwards_mapping = {}
     num_classes = len(classes)
     for i in range(num_classes):
         vector = zeros(num_classes, dtype=int8)
         vector[i] = 1
         one_hot_map[classes[i]] = vector
-    return one_hot_map
+        #backwards_mapping[vector] = classes[i]
+    return one_hot_map #, backwards_mapping
 
 
 def get_train_test_split(labeled_list_of_tuples, train_percentage=0.8, shuffle=True):
@@ -34,10 +44,10 @@ def plot_images(images_to_plot):
         plt.matshow(image)
     plt.show()
 
+def encode_one_hot(num):
+    return [int(x==num) for x in range(10)]
 
-if __name__ == "__main__":
-    # Digits.images is the array of numpy np.arrays of 8x8 with innts in range [0, 16] for each pixel
-    digits = load_digits()
-    train, test = get_train_test_split(make_case_tuples(digits))
-    one_hot_map = one_hot_encoding_of_sequence([i for i in range(10)])
-    plot_images(digits.images[:5])
+def decode_one_hot(vec):
+    return argmax(vec)
+
+one_hot_map = one_hot_encoding_of_sequence([i for i in range(10)])
