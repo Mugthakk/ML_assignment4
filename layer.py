@@ -7,7 +7,9 @@ class Layer:
     def __init__(self, in_size, num_of_nodes, level, is_output_layer=False, activation_function=sigmoid):
         self.level = level
         self.is_output_layer = is_output_layer
-        self.weights = 2*np.random.rand(in_size, num_of_nodes)-1
+        #Smart init of weights
+        bound = 1/np.sqrt(num_of_nodes)
+        self.weights = 2*bound*np.random.rand(in_size, num_of_nodes)-bound
         self.num_nodes = num_of_nodes
         self.activation_threshhold = 0.5
         #typecasting in case of datatype issues later
@@ -25,7 +27,7 @@ class Layer:
             input_vector = input_vector[np.newaxis]
 
         z = np.dot(input_vector, self.weights)
-        grad_a = np.vectorize(sigmoid_derivated)(z)
+        grad_a = np.vectorize(sigmoid_derivated)(z)         #TODO: Ugly hardcoding should be fixed at some point
 
         #uses is_output_layer to decide error function to be used
         error = grad_loss*grad_a if self.is_output_layer else np.dot(error_prop, grad_loss.T)*grad_a
@@ -100,11 +102,11 @@ def main3(train, epochs):
         print("Result:", result, "is", "correct" if result == sample[1] else "wrong")
         print()
 
-
+'''
 #training samples representing the AND function
 t = [[[0,0],0],[[1,0],0],[[0,1],0],[[1,1],1]]
-main2(t,1000)
-'''
+main2(t,200)
+
 for i in range(1):
     t = [[[0,0],0],[[1,0],1],[[0,1],1],[[1,1],0]]
     main3(t, 1000)
