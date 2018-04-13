@@ -26,7 +26,7 @@ class NeuralNetwork:
             epoch_score = 0
             for case in cases:
 
-                self.forward_pass(case, outputs)
+                self.forward_pass(case, outputs, True)
 
                 # Backpropagation to update weights
                 for i in range(last_layer_index, -1, -1):
@@ -43,13 +43,13 @@ class NeuralNetwork:
             #print(plot_data[:3])
             error_plot(plot_data)
 
-    def forward_pass(self, case, outputs):
+    def forward_pass(self, case, outputs, training=False):
         for i in range(len(self.layers)):
             layer = self.layers[i]
             input_vector = np.array(case[0]) if i == 0 else outputs[i-1]
             #add bias
             input_vector = np.append(input_vector, [1])
-            output = layer.forward_step(input_vector)
+            output = layer.forward_step(input_vector, training)
             outputs[i] = output
 
     def evaluate(self, samples):

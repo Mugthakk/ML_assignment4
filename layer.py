@@ -16,8 +16,10 @@ class Layer:
         #self.activation_function = np.vectorize(lambda x: int(activation_function(x)>self.activation_threshhold))
         self.activation_function = np.vectorize(activation_function)
 
-    def forward_step(self, input_vector):
-        return get_dropout_vector(self.num_nodes,self.dropout_rate)*self.activation_function(np.dot(input_vector, self.weights))
+    def forward_step(self, input_vector, is_training=False):
+        if is_training and not self.is_output_layer:
+            return get_dropout_vector(self.num_nodes,self.dropout_rate)*self.activation_function(np.dot(input_vector, self.weights))
+        return self.activation_function(np.dot(input_vector, self.weights))
 
     def update_weights(self, input_vector, grad_loss, lr, error_prop=np.array([1])):
         #np.newaxis is hack to transpose 1-D arrays
