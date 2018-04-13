@@ -61,10 +61,35 @@ class NeuralNetwork:
                 correct_samples += 1
         return correct_samples/len(samples)
 
+    def eval_xor(self,samples):
+        correct = 0
+        for i in range(len(samples)):
+            outputs = [0]*len(self.layers)
+            self.forward_pass(np.array(samples[i]), outputs)
+            value = int(outputs[-1]>0.5)
+            #print("sample:",samples[i][0])
+            #print("Output",outputs[-1])
+            correct += value == samples[i][1]
+        return correct/len(samples)
 
 if __name__ == "__main__":
-    sanderErNoob = NeuralNetwork(2,[2,1],[0,1], 0.25)
-    t = [[[0,0],0],[[1,0],1],[[0,1],1],[[1,1],0]]
-    sanderErNoob.train(t,5000,True)
-    sanderErNoob.evaluate(t)
+    for _ in range(10):
+        sanderErNoob = NeuralNetwork(2,[2,1],[0,1], 0.1)
+        t = [[[0,0],0],[[1,0],1],[[0,1],1],[[1,1],0]]
+        sanderErNoob.train(t,5000,False)
+        print(sanderErNoob.eval_xor(t))
+    print()
+
+    for _ in range(10):
+        sanderErNoob = NeuralNetwork(2,[2,1],[0,1], 0.2)
+        t = [[[0,0],0],[[1,0],1],[[0,1],1],[[1,1],0]]
+        sanderErNoob.train(t,5000,False)
+        print(sanderErNoob.eval_xor(t))
+    print()
+
+    for _ in range(10):
+        sanderErNoob = NeuralNetwork(2,[2,1],[0,1], 0.3)
+        t = [[[0,0],0],[[1,0],1],[[0,1],1],[[1,1],0]]
+        sanderErNoob.train(t,5000,False)
+        print(sanderErNoob.eval_xor(t))
 
