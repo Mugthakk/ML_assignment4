@@ -6,13 +6,13 @@ from recognize_digits import decode_one_hot
 
 class NeuralNetwork:
 
-    def __init__(self, num_of_features, layers, classes, learning_rate):
+    def __init__(self, num_of_features, layers, classes, learning_rate, dropout_rate=0):
         self.lr = learning_rate
         self.num_of_features = num_of_features
         self.layers = []
         inn = num_of_features
         for i in range(len(layers)):
-            self.layers.append(Layer(inn+1, layers[i], i, i==len(layers)-1))
+            self.layers.append(Layer(inn+1, layers[i], i, i==len(layers)-1,dropout_rate))
             inn = layers[i]
         self.classes = np.array(classes)
 

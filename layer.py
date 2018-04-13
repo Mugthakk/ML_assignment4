@@ -1,23 +1,23 @@
 import numpy as np
-from util import sigmoid,sigmoid_derivated, squared_loss, squared_loss_derivated
+from util import sigmoid,sigmoid_derivated, get_dropout_vector, squared_loss_derivated
 
 
 class Layer:
 
-    def __init__(self, in_size, num_of_nodes, level, is_output_layer=False, activation_function=sigmoid):
+    def __init__(self, in_size, num_of_nodes, level, is_output_layer=False, dropout_rate=0, activation_function=sigmoid):
         self.level = level
         self.is_output_layer = is_output_layer
         #Smart init of weights
         bound = 1/np.sqrt(num_of_nodes)
         self.weights = 2*bound*np.random.rand(in_size, num_of_nodes)-bound
         self.num_nodes = num_of_nodes
-        self.activation_threshhold = 0.5
+        self.dropout_rate = dropout_rate
         #typecasting in case of datatype issues later
         #self.activation_function = np.vectorize(lambda x: int(activation_function(x)>self.activation_threshhold))
         self.activation_function = np.vectorize(activation_function)
 
     def forward_step(self, input_vector):
-        return self.activation_function(np.dot(input_vector, self.weights))
+        return get_dropout_vector(self.num_nodes,self.dropout_rate)*self.activation_function(np.dot(input_vector, self.weights))
 
     def update_weights(self, input_vector, grad_loss, lr, error_prop=np.array([1])):
         #np.newaxis is hack to transpose 1-D arrays

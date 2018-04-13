@@ -21,3 +21,10 @@ def error_plot(data):
     pyplot.xlabel("Epoch")
     pyplot.ylabel("Sum error over all training samples in one epoch")
     pyplot.show()
+
+def get_dropout_vector(size, dropout_rate):
+    do_vec = (np.random.rand(size)>dropout_rate).astype(int)
+    if np.max(do_vec) < 1:
+        return get_dropout_vector(size,dropout_rate)
+    do_vec = do_vec*size/np.sum(do_vec)
+    return do_vec
