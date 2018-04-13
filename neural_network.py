@@ -68,7 +68,7 @@ class NeuralNetwork:
             outputs = [0]*len(self.layers)
             self.forward_pass(np.array(samples[i]), outputs)
             guesses.append(np.argmax(outputs[-1]))
-        cm = make_confusion_matrix(guesses, [sample[1] for sample in samples],(10,10))
+        cm = make_confusion_matrix(guesses, [decode_one_hot(sample[1]) for sample in samples],(10,10))
         plot_confusion_matrix(cm)
 
 
