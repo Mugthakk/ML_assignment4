@@ -1,4 +1,3 @@
-__author__ = 'Ivar A. Fauske'
 # This Python file uses the following encoding: utf-8
 
 import numpy as np
@@ -28,3 +27,18 @@ def get_dropout_vector(size, dropout_rate):
         return get_dropout_vector(size,dropout_rate)
     do_vec = do_vec*size/np.sum(do_vec)
     return do_vec
+
+def make_confusion_matrix(guesses, corrects, shape):
+    cm = np.array([[0 for i in range(shape[1])] for j in range(shape[0])])
+    for i in range(len(guesses)):
+        cm[guesses[i],corrects[i]] += 1
+    return cm
+
+def plot_confusion_matrix(cm):
+    pyplot.imshow(cm, interpolation='nearest', cmap=pyplot.cm.Blues)
+    for i in range(cm.shape[0]):
+        for j in range(cm.shape[1]):
+            pyplot.text(j, i, cm[i,j])
+    pyplot.xlabel("Correct")
+    pyplot.ylabel("Networks classification")
+    pyplot.show()

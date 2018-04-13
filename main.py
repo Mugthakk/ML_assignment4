@@ -12,3 +12,14 @@ if __name__ == "__main__":
         train_tuples, test_tuples = get_train_test_split(digits)
         nn.train(cases=train_tuples, epochs=50,show_error_plot=False)
         print(nn.evaluate(test_tuples))
+        nn.confusion_matrix(test_tuples)
+
+'''
+if __name__ == "__main__":
+
+    for _ in range(10):
+        nn = NeuralNetwork(2,[2,1],[0,1], 0.2)
+        t = [[[0,0],0],[[1,0],1],[[0,1],1],[[1,1],0]]
+        nn.train(t,5000,False)
+        print(nn.eval_xor(t))
+'''

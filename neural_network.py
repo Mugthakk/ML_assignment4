@@ -1,5 +1,5 @@
 import numpy as np
-from util import error_plot, squared_loss_derivated, squared_loss
+from util import error_plot, squared_loss_derivated, squared_loss, make_confusion_matrix,plot_confusion_matrix
 from layer import Layer
 from recognize_digits import decode_one_hot
 
@@ -26,6 +26,7 @@ class NeuralNetwork:
             epoch_score = 0
             for case in cases:
 
+                #no need to asign to variable, the results are stored in outputs
                 self.forward_pass(case, outputs, True)
 
                 # Backpropagation to update weights
@@ -40,9 +41,9 @@ class NeuralNetwork:
                     epoch_score += np.sum(squared_loss(case[1], outputs[-1]))
             plot_data.append(epoch_score)
         if show_error_plot:
-            #print(plot_data[:3])
             error_plot(plot_data)
 
+    #a bit weird as it manipulates the list outputs which it takes as a parameter
     def forward_pass(self, case, outputs, training=False):
         for i in range(len(self.layers)):
             layer = self.layers[i]
@@ -61,35 +62,24 @@ class NeuralNetwork:
                 correct_samples += 1
         return correct_samples/len(samples)
 
+    def confusion_matrix(self, samples):
+        guesses = []
+        for i in range(len(samples)):
+            outputs = [0]*len(self.layers)
+            self.forward_pass(np.array(samples[i]), outputs)
+            guesses.append(np.argmax(outputs[-1]))
+        cm = make_confusion_matrix(guesses, [sample[1] for sample in samples],(10,10))
+        plot_confusion_matrix(cm)
+
+
     def eval_xor(self,samples):
         correct = 0
         for i in range(len(samples)):
             outputs = [0]*len(self.layers)
             self.forward_pass(np.array(samples[i]), outputs)
             value = int(outputs[-1]>0.5)
-            #print("sample:",samples[i][0])
-            #print("Output",outputs[-1])
             correct += value == samples[i][1]
         return correct/len(samples)
 
-if __name__ == "__main__":
-    for _ in range(10):
-        sanderErNoob = NeuralNetwork(2,[2,1],[0,1], 0.1)
-        t = [[[0,0],0],[[1,0],1],[[0,1],1],[[1,1],0]]
-        sanderErNoob.train(t,5000,False)
-        print(sanderErNoob.eval_xor(t))
-    print()
 
-    for _ in range(10):
-        sanderErNoob = NeuralNetwork(2,[2,1],[0,1], 0.2)
-        t = [[[0,0],0],[[1,0],1],[[0,1],1],[[1,1],0]]
-        sanderErNoob.train(t,5000,False)
-        print(sanderErNoob.eval_xor(t))
-    print()
-
-    for _ in range(10):
-        sanderErNoob = NeuralNetwork(2,[2,1],[0,1], 0.3)
-        t = [[[0,0],0],[[1,0],1],[[0,1],1],[[1,1],0]]
-        sanderErNoob.train(t,5000,False)
-        print(sanderErNoob.eval_xor(t))
 

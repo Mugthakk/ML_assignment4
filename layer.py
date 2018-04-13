@@ -12,8 +12,6 @@ class Layer:
         self.weights = 2*bound*np.random.rand(in_size, num_of_nodes)-bound
         self.num_nodes = num_of_nodes
         self.dropout_rate = dropout_rate
-        #typecasting in case of datatype issues later
-        #self.activation_function = np.vectorize(lambda x: int(activation_function(x)>self.activation_threshhold))
         self.activation_function = np.vectorize(activation_function)
 
     def forward_step(self, input_vector, is_training=False):

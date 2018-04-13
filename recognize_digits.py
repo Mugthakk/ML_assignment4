@@ -22,14 +22,12 @@ def get_digit_tuples(normalize=False):
 
 def one_hot_encoding_of_sequence(classes):
     one_hot_map = {}
-    #backwards_mapping = {}
     num_classes = len(classes)
     for i in range(num_classes):
         vector = zeros(num_classes, dtype=int8)
         vector[i] = 1
         one_hot_map[classes[i]] = vector
-        #backwards_mapping[vector] = classes[i]
-    return one_hot_map #, backwards_mapping
+    return one_hot_map
 
 
 def get_train_test_split(labeled_list_of_tuples, train_percentage=0.8, shuffle=True):
